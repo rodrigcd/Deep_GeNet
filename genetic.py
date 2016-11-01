@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class KernelGene:
+class KernelGene(object):
     'Basic unit of genetic code as filter'
 
     def __init__(self, kernel, stride):
@@ -17,12 +17,13 @@ class KernelGene:
         return 'filter size = '+str(self.kernel.shape)+ ', stride = '+str(self.stride)
 
     def mutate(self):
+        # TODO: set appropriate std to this gaussian 
         self.kernel += np.random.normal(size = self.kernel.shape)
 
 
-class PoolingChromosome:
+class PoolingChromosome(object):
     'Basic unit of genetic code as pooling'
-    #TODO: Check input parameters
+    # TODO: Check input parameters
     def __init__(self, pooling_size, stride):
         self.id_layer = 'pooling'
         self.size = pooling_size
@@ -32,7 +33,7 @@ class PoolingChromosome:
         return self.id_layer +': size = ' + str(self.size) + ' stride = ' + str(self.stride)
 
 
-class KernelChromosome:
+class KernelChromosome(object):
     'Many genes(filter) forming a chromosome(layer)'
     #TODO: Implement geneCrossover, set and get
     def __init__(self, kernels, strides):
@@ -56,7 +57,7 @@ class KernelChromosome:
             str_structure += 'kernel '+str(i) +': '+str(self.genes[i])+'\n'
         return str_structure
 
-class Genome:
+class Genome(object):
     'Many chromosomes(layers) forming a Genome(entire network)'
     #TODO: Implement constructor to given parameters ? and chromCrossover
     def __init__(self, chromosome_type = [], parameters = []):
