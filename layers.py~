@@ -1,0 +1,13 @@
+import tensorflow as tf
+
+class Layer(object):
+    def __init__(self):
+        pass
+
+class ConvolutionalLayer(Layer):
+    def __init__(self):
+        pass
+
+class FullyConnectedLayer(Layer):
+    def __init__(self):
+        pass

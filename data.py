@@ -8,7 +8,7 @@ import cPickle as pickle
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-DIR_BINARIES='/home/shared/cifar-10-batches-py/'
+DIR_BINARIES='/home/ignacio/Downloads/cifar-10-batches-py/'
 
 def unpickle(filename):
     f = open(filename, 'rb')
@@ -54,7 +54,7 @@ class Database(object):
         return self.current_epoch
 
     # TODO: refactor getTestSet and getValidationSet to avoid code replication
-    def getTestSet(self, asBatches=False):
+    def getTestSet(self, asBatches=True):
         if asBatches:
             batches = []
             for i in range(len(self.test_labels)//self.batch_size):
@@ -68,7 +68,7 @@ class Database(object):
         else:
             return (self.test_data, self.test_labels)
 
-    def getValidationSet(self, asBatches=False):
+    def getValidationSet(self, asBatches=True):
         if asBatches:
             batches = []
             for i in range(len(self.validation_labels)//self.batch_size):
