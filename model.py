@@ -10,9 +10,20 @@ class NeuralNetwork(object):
         # self.sess = tf.Session()
 
     def train_iterations(self, n_iterations):
-        # TODO
-        pass    
-
+        for iteration in range(n_iterations):
+            data, labels = self.database.nextBatch()
+            self.train_step.eval(feed_dict={
+                self.model_input: data,
+                self.target: labels
+            })
+        train_accuracy = self.accuracy.eval(
+            feed_dict={
+                self.model_input: data,
+                self.target: labels
+                }
+            )
+        return train_accuracy
+            
     def update_genome(self, genome):
         # TODO
         pass

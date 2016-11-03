@@ -28,3 +28,15 @@ class FullyConnectedLayer(Layer):
                                       initializer=tf.constant_initializer(0.0))
         self.mult_out = tf.matmul(self.input_tensor, self.weights)
         self.output_tensor = tf.nn.relu(self.mult_out + self.biases)
+
+class MaxPoolingLayer(Layer):
+    def __init__(self, input_tensor, layer_name,
+                 ksize=[1,2,2,1],
+                 strides=[1,2,2,1]):
+        super(MaxPoolingLayer, self).__init__(input_tensor, layer_name)
+        self.output_tensor = tf.nn.max_pool(self.input_tensor,
+                                            ksize=ksize,
+                                            strides=strides,
+                                            padding='SAME',
+                                            name=self.layer_name)
+        

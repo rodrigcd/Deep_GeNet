@@ -35,7 +35,7 @@ class Database(object):
     def __init__(self):
         # TODO
         pass
-    def nextBatch(self):
+    def nextBatch(self, with_idx=False):
         ''' Returns a tuple with batch and batch index '''
         start_idx = self.current_batch*self.batch_size
         end_idx = start_idx + self.batch_size 
@@ -47,8 +47,11 @@ class Database(object):
         self.current_batch = (self.current_batch+1)%self.n_batches
         if self.current_batch != batch_idx+1:
             self.current_epoch += 1
-            
-        return ((batch_data, batch_labels), batch_idx)
+
+        if with_idx:
+            return ((batch_data, batch_labels), batch_idx)
+        else:
+            return (batch_data, batch_labels)
     
     def getEpoch(self):
         return self.current_epoch
