@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class KernelGene(object):
     'Basic unit of genetic code as filter'
 
@@ -18,8 +17,9 @@ class KernelGene(object):
 
     def mutate(self,p):
         # TODO: set appropriate std to this gaussian
-        if p < np.random.rand():
+        if p >= np.random.rand():
             self.kernel += np.random.normal(size = self.kernel.shape)
+            return True
 
 
 class PoolingChromosome(object):
@@ -33,11 +33,15 @@ class PoolingChromosome(object):
     def __str__(self):
         return self.id_layer +': size = ' + str(self.size) + ' stride = ' + str(self.stride)
 
+    def mutate(self,p):
+        return [] # dummy function
+
 
 class KernelChromosome(object):
     'Many genes(filter) forming a chromosome(layer)'
+
     #TODO: Implement geneCrossover, set and get
-    def __init__(self, kernels, strides):
+    def __init__(self, kernels = [], strides = []):
         '''
         kernels: list of kernels n x m numpy arrays
         strides: list of stride value of each kernel
@@ -67,12 +71,16 @@ class KernelChromosome(object):
         cross_point1 = np.random.randint(len(self.genes))
         cross_point2 = np.random.randint(len(chromosome.genes))
         child1_genes = self.genes[:cross_point1] + chromosome.genes[cross_point2:]
-        child2_genes = self.genes[:cross_point2] + chromosome.genes[cross_point1:]
-        child1 = KernelChromosome([],[])
-        child2 = KernelChromosome([],[])
+        child2_genes = chromosome.genes[:cross_point2] + self.genes[cross_point1:]
+        child1 = KernelChromosome()
+        child2 = KernelChromosome()
         child1.setGenes(child1_genes)
         child2.setGenes(child2_genes)
         return child1, child2
+
+    def mutate(self, p):
+        for i in range(len(self.genes)):
+            self.genes[i].mutate(p)
 
 
 class Genome(object):
@@ -93,6 +101,10 @@ class Genome(object):
         for i in range(self.n_chromosomes):
             str_structure += '---Chromosome '+str(i)+': \n'+str(self.chromosomes[i])
         return str_structure
+
+    def mutate(self, p):
+        for i in range(len(self.chromosomes)):
+            self.chromosomes[i].mutate(p)
 
 
 
