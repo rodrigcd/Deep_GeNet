@@ -16,9 +16,10 @@ class KernelGene(object):
     def __str__(self):
         return 'filter size = '+str(self.kernel.shape)+ ', stride = '+str(self.stride)
 
-    def mutate(self):
-        # TODO: set appropriate std to this gaussian 
-        self.kernel += np.random.normal(size = self.kernel.shape)
+    def mutate(self,p):
+        # TODO: set appropriate std to this gaussian
+        if p < np.random.rand():
+            self.kernel += np.random.normal(size = self.kernel.shape)
 
 
 class PoolingChromosome(object):
@@ -56,6 +57,23 @@ class KernelChromosome(object):
         for i in range(self.n_kernels):
             str_structure += 'kernel '+str(i) +': '+str(self.genes[i])+'\n'
         return str_structure
+
+    def setGenes(self, genes):
+        self.n_kernels = len(genes)
+        self.genes = genes
+
+    def genCrossover(self, chromosome):
+        #Get crossover point
+        cross_point1 = np.random.randint(len(self.genes))
+        cross_point2 = np.random.randint(len(chromosome.genes))
+        child1_genes = self.genes[:cross_point1] + chromosome.genes[cross_point2:]
+        child2_genes = self.genes[:cross_point2] + chromosome.genes[cross_point1:]
+        child1 = KernelChromosome([],[])
+        child2 = KernelChromosome([],[])
+        child1.setGenes(child1_genes)
+        child2.setGenes(child2_genes)
+        return child1, child2
+
 
 class Genome(object):
     'Many chromosomes(layers) forming a Genome(entire network)'
