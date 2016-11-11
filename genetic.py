@@ -62,7 +62,7 @@ class KernelChromosome(object):
         self.n_kernels = len(genes)
         self.genes = genes
 
-    def genCrossover(self, chromosome):
+    def geneCrossover(self, chromosome):
         #Get crossover point
         cross_point1 = np.random.randint(len(self.genes))
         cross_point2 = np.random.randint(len(chromosome.genes))
