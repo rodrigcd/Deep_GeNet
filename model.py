@@ -15,11 +15,14 @@ class NeuralNetwork(object):
                                             tf.argmax(self.target,1))
         self.accuracy = tf.reduce_mean(
             tf.cast(self.correct_predictions, tf.float32), name='accuracy')
-        self.sess.run(tf.initialize_all_variables())
+        self.reset_params()
     
     def build_model(self):
         raise NotImplementedError("Must override NeuralNetwork.build_model()")
 
+    def reset_params(self):
+        self.sess.run(tf.initialize_all_variables())
+        
     def train_iterations(self, n_iterations):
         for iteration in range(n_iterations):
             data, labels = self.database.nextBatch()
@@ -55,7 +58,17 @@ class NeuralNetwork(object):
                 )
             )
         return np.array(accuracies).mean()
-    
+
+    def get_params(self):
+        params = []
+        for layer in self.layers:
+            params.append(layer.get_params(self.sess))
+        return params
+
+    def set_params(self, params):
+        for param, layer in zip(params, self.layers):
+            layer.set_params(param, self.sess)
+            
 class ConvolutionalNetwork(NeuralNetwork):
     def __init__(self, database):
         super(ConvolutionalNetwork, self).__init__(database)
@@ -72,6 +85,8 @@ class ConvolutionalNetwork(NeuralNetwork):
         self.fc_layer = FullyConnectedLayer(self.fc_input,
                                             [32*32*32, 10],
                                             'fc_layer_1')
+        self.layers = [self.conv_layer_1,
+                       self.fc_layer]
         self.model_output = self.fc_layer.output_tensor
         
         self.loss = tf.reduce_mean(
@@ -91,7 +106,13 @@ if __name__=='__main__':
     data, labels = database.getTestSet(asBatches=False)
     print len(data), len(labels)
     convnet = ConvolutionalNetwork(database)
-    print convnet.evaluate()
+    print "Initial performance", convnet.evaluate()
     convnet.train_iterations(100)
-    print convnet.evaluate()
-    
+    print "Performance after 100 iterations", convnet.evaluate()
+    params = convnet.get_params()
+    print [[param.shape for param in params_pair] for params_pair in convnet.get_params()]
+    zero_params = [[np.zeros(param.shape) for param in params_pair] for params_pair in convnet.get_params()]
+    convnet.set_params(zero_params)
+    print "Performance with zeros as params", convnet.evaluate()
+    convnet.train_iterations(100)
+    print "Performance after 100 iterations", convnet.evaluate()

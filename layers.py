@@ -6,6 +6,12 @@ class Layer(object):
         self.layer_name = layer_name
         # A self.output_tensor should be implemented on inherited classes
 
+    def get_params(self, session):
+        raise NotImplementedError("Must override Layer.get_params()")
+
+    def set_params(self, params, session):
+        raise NotImplementedError("Must override Layer.set_params()")
+    
 class ConvolutionalLayer(Layer):
     def __init__(self, input_tensor, kernel_shape, layer_name):
         super(ConvolutionalLayer, self).__init__(input_tensor, layer_name)
@@ -19,6 +25,14 @@ class ConvolutionalLayer(Layer):
                                          strides=[1,1,1,1], padding='SAME')
             self.output_tensor = tf.nn.relu(self.conv_out + self.biases)
 
+    def get_params(self, session):
+        return session.run((self.weights, self.biases))
+
+    def set_params(self, params, session):
+        self.set_weights = self.weights.assign(params[0])
+        self.set_biases = self.biases.assign(params[1])
+        session.run((self.set_weights, self.set_biases))
+        
 class FullyConnectedLayer(Layer):
     def __init__(self, input_tensor, weights_shape, layer_name):
         super(FullyConnectedLayer, self).__init__(input_tensor, layer_name)
@@ -31,6 +45,14 @@ class FullyConnectedLayer(Layer):
             self.mult_out = tf.matmul(self.input_tensor, self.weights)
             self.output_tensor = tf.nn.relu(self.mult_out + self.biases)
 
+    def get_params(self, session):
+        return session.run((self.weights, self.biases))
+
+    def set_params(self, params, session):
+        self.set_weights = self.weights.assign(params[0])
+        self.set_biases = self.biases.assign(params[1])
+        session.run((self.set_weights, self.set_biases))
+    
 class MaxPoolingLayer(Layer):
     def __init__(self, input_tensor, layer_name,
                  ksize=[1,2,2,1],
@@ -42,3 +64,8 @@ class MaxPoolingLayer(Layer):
                                             padding='SAME',
                                             name=self.layer_name)
         
+    def get_params(self, session):
+        return None
+
+    def set_params(self, params, session):
+        pass
