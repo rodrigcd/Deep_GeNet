@@ -56,7 +56,7 @@ class Population(object):
         self.fitness = list()
         self.n_indiv = n_indiv
         self.generation = 0
-        self.n_iter = 50
+        self.n_iter = 2
         self.fix_n_indiv = n_indiv
         aux_fitness = np.zeros(n_indiv)
         for i in range(n_indiv):
@@ -67,18 +67,18 @@ class Population(object):
         self.fitness = aux_fitness
 
     def crossover(self):
-        acumulated_prob = np.cumsum(fitness[self.generation])
+        acumulated_prob = np.cumsum(self.fitness[self.generation])
         acumulated_prob = acumulated_prob/np.max(acumulated_prob)
         aux = self.n_indiv
         for i in range(int(self.n_indiv/2)):
             random1 = np.random.uniform()
             random2 = np.random.uniform()
-            index1 = np.min(np.nonzero(np.divide_floor(acumulated_prob,random1)))
-            index2 = np.min(np.nonzero(np.divide_floor(acumulated_prob,random2)))
+            index1 = np.min(np.nonzero(np.floor_divide(acumulated_prob,random1)))
+            index2 = np.min(np.nonzero(np.floor_divide(acumulated_prob,random2)))
             child1, child2 = self.individuals[index1].crossover(self.individuals[index2], self.n_iter)
             self.individuals.append(child1)
             self.individuals.append(child2)
-            aux+= 2
+            aux += 2
         self.n_indiv = aux
 
     def mutate(self, p = 0.05):
@@ -103,15 +103,24 @@ class Population(object):
         for i in index:
             aux_list.append(self.individuals[i])
         self.individuals = aux_list
+        self.n_indiv = len(self.individuals)
 
     def iter(self):
+        print("generation = "+str(self.generation))
+        print("growing")
         self.grow_population()
+        print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
+        print("crossover")
         self.crossover()
         self.update_fitness()
+        print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
         self.select_individuals()
         self.mutate()
         self.generation += 1
-        
+        self.update_fitness
+        print("after selection and mutation")
+        print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
+        return self.fitness
 
 
 

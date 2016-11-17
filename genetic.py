@@ -129,10 +129,10 @@ class Genome(object):
     def set_parameters(self, parameters):
         self.n_chromosomes= len(parameters)
         self.chromosomes = list()
-        for i in range(len(n_chromosomes)):
+        for i in range(self.n_chromosomes):
             filters = list()
-            for j in range(parameters[i].shape[3]):
-                filters.append(parameters[i][:,:,:,j])
+            for j in range(parameters[i][0].shape[3]):
+                filters.append(parameters[i][0][:,:,:,j])
             biases = parameters[i][1]
             self.chromosomes.append(KernelChromosome(filters,biases))
 
