@@ -18,7 +18,7 @@ class KernelGene(object):
     def mutate(self,p):
         # TODO: set appropriate std to this gaussian
         if p >= np.random.rand():
-            self.kernel += np.random.normal(size = self.kernel.shape)
+            self.kernel = np.random.normal(size = self.kernel.shape)
             return True
 
 
@@ -140,9 +140,9 @@ class Genome(object):
         parameters = list()
         for i in range(self.n_chromosomes):
             parameter_chromosome = list()
-            dim = self.chromosomes[i].kernels_shape + (n_kernels,)
+            dim = self.chromosomes[i].kernels_shape + (self.chromosomes[i].n_kernels,)
             filters = np.zeros(shape = dim)
-            biases = np.zeros(shape = (n_kernels,))
+            biases = np.zeros(shape = (self.chromosomes[i].n_kernels,))
             for j in range(self.chromosomes[i].n_kernels):
                 filters[:,:,:,j] = self.chromosomes[i].genes[j].kernel
                 biases[j] = self.chromosomes[i].genes[j].bias
