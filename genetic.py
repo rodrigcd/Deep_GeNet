@@ -46,7 +46,7 @@ class KernelChromosome(object):
         kernels: list of kernels n x m numpy arrays
         biases: list of biases value of each kernel
         '''
-        if len(kernels) != biases.size:
+        if len(kernels) != len(biases):
             raise ValueError('kernels and biases must have same length')
 
         self.id_layer = 'convolution'
@@ -55,7 +55,10 @@ class KernelChromosome(object):
         for i in range(self.n_kernels):
             genes.append(KernelGene(kernels[i], biases[i]))
         self.genes = genes
-        self.kernels_shape = self.genes[0].kernel.shape
+        if len(kernels) == 0:
+            self.kernels_shape = (3,3,3)
+        else:
+            self.kernels_shape = self.genes[0].kernel.shape
 
     def __str__(self):
         str_structure = self.id_layer + ':\n'
@@ -66,6 +69,7 @@ class KernelChromosome(object):
     def setGenes(self, genes):
         self.n_kernels = len(genes)
         self.genes = genes
+        self.kernels_shape = self.genes[0].kernel.shape
 
     def geneCrossover(self, chromosome):
         #Get crossover point
@@ -97,9 +101,10 @@ class Genome(object):
             self.chromosomes = list()
             for i in range(self.n_chromosomes):
                 filters = list()
+                biases = list()
                 for j in range(parameters[i][0].shape[3]):
                     filters.append(parameters[i][0][:,:,:,j])
-                biases = parameters[i][1]
+                    biases.append(parameters[i][1][j])
                 self.chromosomes.append(KernelChromosome(filters,biases))
 
     def __str__(self):
