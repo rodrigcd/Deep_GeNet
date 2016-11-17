@@ -3,17 +3,17 @@ import numpy as np
 class KernelGene(object):
     'Basic unit of genetic code as filter'
 
-    def __init__(self, kernel, stride):
+    def __init__(self, kernel, bias):
 
         if (type(kernel).__module__ != np.__name__):
             raise ValueError('Kernel Gene must be a numpy array')
-        elif (type(stride).__name__ != 'int' or stride <= 0):
-            raise ValueError('Stride must be an integer bigger than 0')
+        #elif (type(stride).__name__ != 'int' or stride <= 0):
+        #    raise ValueError('Stride must be an integer bigger than 0')
         self.kernel = kernel
-        self.stride = stride
+        self.bias = bias
 
     def __str__(self):
-        return 'filter size = '+str(self.kernel.shape)+ ', stride = '+str(self.stride)
+        return 'filter size = '+str(self.kernel.shape)+ ', bias = '+str(self.bias)
 
     def mutate(self,p):
         # TODO: set appropriate std to this gaussian
@@ -41,20 +41,21 @@ class KernelChromosome(object):
     'Many genes(filter) forming a chromosome(layer)'
 
     #TODO: Implement geneCrossover, set and get
-    def __init__(self, kernels = [], strides = []):
+    def __init__(self, kernels = [], biases = []):
         '''
         kernels: list of kernels n x m numpy arrays
-        strides: list of stride value of each kernel
+        biases: list of biases value of each kernel
         '''
-        if len(kernels) != len(strides):
-            raise ValueError('kernels and strides must have same length')
+        if len(kernels) != biases.size:
+            raise ValueError('kernels and biases must have same length')
 
         self.id_layer = 'convolution'
         self.n_kernels = len(kernels)
         genes = list()
         for i in range(self.n_kernels):
-            genes.append(KernelGene(kernels[i], strides[i]))
+            genes.append(KernelGene(kernels[i], biases[i]))
         self.genes = genes
+        self.kernels_shape = self.genes[0].kernel.shape
 
     def __str__(self):
         str_structure = self.id_layer + ':\n'
@@ -70,8 +71,8 @@ class KernelChromosome(object):
         #Get crossover point
         cross_point1 = np.random.randint(len(self.genes))
         cross_point2 = np.random.randint(len(chromosome.genes))
-        child1_genes = self.genes[:cross_point1] + chromosome.genes[cross_point2:]
-        child2_genes = chromosome.genes[:cross_point2] + self.genes[cross_point1:]
+        child1_genes = self.genes[:cross_point1] + chromosome.genes[cross_point1:]
+        child2_genes = chromosome.genes[:cross_point1] + self.genes[cross_point1:]
         child1 = KernelChromosome()
         child2 = KernelChromosome()
         child1.setGenes(child1_genes)
@@ -86,15 +87,20 @@ class KernelChromosome(object):
 class Genome(object):
     'Many chromosomes(layers) forming a Genome(entire network)'
     #TODO: Implement constructor to given parameters ? and chromCrossover
-    def __init__(self, chromosome_type = [], parameters = []):
-        if len(chromosome_type) == 0:
-            self.chromosome_type = ['convolution', 'pooling']
-            self.n_chromosomes = len(self.chromosome_type)
-            filters = [np.random.normal(size = (3,3)) for i in range(4)]
-            strides = [1,1,1,1]
+    def __init__(self, parameters = []):
+        if len(parameters) == 0:
+            #self.chromosome_type = ['convolution', 'pooling']
+            self.n_chromosomes = 0
             self.chromosomes = list()
-            self.chromosomes.append(KernelChromosome(filters,strides))
-            self.chromosomes.append(PoolingChromosome((2,2),1))
+        else:
+            self.n_chromosomes= len(parameters)
+            self.chromosomes = list()
+            for i in range(self.n_chromosomes):
+                filters = list()
+                for j in range(parameters[i][0].shape[3]):
+                    filters.append(parameters[i][0][:,:,:,j])
+                biases = parameters[i][1]
+                self.chromosomes.append(KernelChromosome(filters,biases))
 
     def __str__(self):
         str_structure = '------Genome------\n'
@@ -105,6 +111,42 @@ class Genome(object):
     def mutate(self, p):
         for i in range(len(self.chromosomes)):
             self.chromosomes[i].mutate(p)
+
+    def crossover(self, genome):
+        child1 = Genome()
+        child2 = Genome()
+        for i in range (self.n_chromosomes):
+            chromo1, chromo2 = self.chromosomes[i].geneCrossover(genome.chromosomes[i])
+            child1.add_chromosome(chromo1)
+            child2.add_chromosome(chromo2)
+        return child1, child2
+
+    def set_parameters(self, parameters):
+        self.n_chromosomes= len(parameters)
+        self.chromosomes = list()
+        for i in range(len(n_chromosomes)):
+            filters = list()
+            for j in range(parameters[i].shape[3]):
+                filters.append(parameters[i][:,:,:,j])
+            biases = parameters[i][1]
+            self.chromosomes.append(KernelChromosome(filters,biases))
+
+    def get_parameters(self):
+        parameters = list()
+        for i in range(self.n_chromosomes):
+            parameter_chromosome = list()
+            dim = self.chromosomes[i].kernels_shape + (n_kernels,)
+            filters = np.zeros(shape = dim)
+            biases = np.zeros(shape = (n_kernels,))
+            for j in range(self.chromosomes[i].n_kernels):
+                filters[:,:,:,j] = self.chromosomes[i].genes[j].kernel
+                biases[j] = self.chromosomes[i].genes[j].bias
+            parameters.append([filters, biases])
+        return parameters
+
+    def add_chromosome(self, chromosome):
+        self.chromosomes.append(chromosome)
+        self.n_chromosomes += 1
 
 
 
