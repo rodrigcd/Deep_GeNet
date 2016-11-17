@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import cPickle as pickle
 
 from .data import Database, CIFAR10
 from .layers import ConvolutionalLayer, MaxPoolingLayer, FullyConnectedLayer
@@ -42,4 +43,7 @@ n_gen = 100
 population = Population()
 for i in range(n_gen):
     fitness.append(population.iter())
+
+with open('workfile.pkl', 'w') as f:
+    pickle.dump({'fitness': fitness}, f, pickle.HIGHEST_PROTOCOL)
 

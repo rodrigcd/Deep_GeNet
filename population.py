@@ -11,6 +11,7 @@ class Individual(object):
     database = CIFAR10(batch_size = 100, augment_data=True)
     convnet = ConvolutionalNetwork(database)
     def __init__(self):
+        self.convnet.reset_params()
         self.phenotype = self.convnet.get_params()
         self.genome = Genome(self.phenotype)
         self.fitness = 0
@@ -22,6 +23,7 @@ class Individual(object):
         self.convnet.set_params(self.genome.get_parameters())
 
     def grow(self, n_iter, just_fc = False):
+        self.convnet.reset_params()
         self.update_phenotype()
         self.convnet.train_iterations(n_iter, just_fc = just_fc)
         self.fitness = self.convnet.evaluate()
@@ -56,13 +58,12 @@ class Population(object):
         self.fitness = list()
         self.n_indiv = n_indiv
         self.generation = 0
-        self.n_iter = 2
+        self.n_iter = 30
         self.fix_n_indiv = n_indiv
         aux_fitness = np.zeros(n_indiv)
         for i in range(n_indiv):
             self.individuals.append(Individual())
             aux_fitness[i] = self.individuals[i].evaluate()
-            self.individuals[i].convnet.reset_params
 
         self.fitness = aux_fitness
 
@@ -109,15 +110,17 @@ class Population(object):
         print("generation = "+str(self.generation))
         print("growing")
         self.grow_population()
+        print(self.fitness)
         print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
         print("crossover")
         self.crossover()
-        self.update_fitness()
+        #self.update_fitness()
         print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
         self.select_individuals()
-        self.mutate()
+        print(self.fitness)
+        #self.mutate()
         self.generation += 1
-        self.update_fitness
+        #self.update_fitness
         print("after selection and mutation")
         print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
         return self.fitness

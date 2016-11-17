@@ -9,7 +9,7 @@ class NeuralNetwork(object):
         self.database = database
         self.sess = tf.Session()
         self.build_model()
-        self.optimizer = tf.train.AdamOptimizer(1e-4)
+        self.optimizer = tf.train.GradientDescentOptimizer(1e-3)
         self.train_all_params = self.optimizer.minimize(self.loss)
         self.train_fc_params = self.optimizer.minimize(self.loss,
                                                        var_list=self.fc_params)
@@ -46,10 +46,6 @@ class NeuralNetwork(object):
                 }, session=self.sess
             )
         return train_accuracy
-            
-    def update_genome(self, genome):
-        # TODO
-        pass
 
     def evaluate(self, use_test=False):
         if use_test:
