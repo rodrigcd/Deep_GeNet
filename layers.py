@@ -44,6 +44,7 @@ class FullyConnectedLayer(Layer):
                                           initializer=tf.constant_initializer(0.0))
             self.mult_out = tf.matmul(self.input_tensor, self.weights)
             self.output_tensor = tf.nn.relu(self.mult_out + self.biases)
+            self.output_tensor_without_relu = self.mult_out+self.biases
 
     def get_params(self, session):
         return session.run((self.weights, self.biases))

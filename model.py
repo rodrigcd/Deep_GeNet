@@ -47,6 +47,18 @@ class NeuralNetwork(object):
             )
         return train_accuracy
 
+    def evaluate_loss(self, choose_set):
+        batches = self.database.getSet(choose_set, asBatches=True)
+        losses = []
+        for batch in batches:
+            data, labels = batch
+            loss_val = self.sess.run((self.loss), feed_dict={
+                self.model_input: data,
+                self.target: labels,
+                self.keep_prob: 1.0})
+            losses.append(loss_val)
+        return np.array(losses).mean()
+    
     def evaluate(self, use_test=False):
         if use_test:
             batches = self.database.getTestSet(asBatches=True)
@@ -84,75 +96,57 @@ class ConvolutionalNetwork(NeuralNetwork):
         self.model_input = tf.placeholder(tf.float32)
         self.target = tf.placeholder(tf.float32)
         self.keep_prob = tf.placeholder(tf.float32)
-        
+
         self.conv_layer_1 = ConvolutionalLayer(self.model_input,
                                                [3, 3, 3, 32],
                                                'conv_layer_1')
-        self.conv_layer_2 = ConvolutionalLayer(self.conv_layer_1.output_tensor,
-                                               [3, 3, 32, 32],
-                                               'conv_layer_2')
-
-        self.pool_layer_3 = MaxPoolingLayer(self.conv_layer_2.output_tensor,
-                                            'pool_layer_3')
-
-        self.conv_layer_4 = ConvolutionalLayer(self.pool_layer_3.output_tensor,
-                                               [3, 3, 32, 64],
-                                               'conv_layer_4')
-        self.conv_layer_5 = ConvolutionalLayer(self.conv_layer_4.output_tensor,
-                                               [3, 3, 64, 64],
+        self.pool_layer_2 = MaxPoolingLayer(self.conv_layer_1.output_tensor,
+                                            'pool_layer_2')
+        self.conv_layer_3 = ConvolutionalLayer(self.pool_layer_2.output_tensor,
+                                               [3, 3, 32,  64],
+                                               'conv_layer_3')
+        self.pool_layer_4 = MaxPoolingLayer(self.conv_layer_3.output_tensor,
+                                            'pool_layer_4')
+        self.conv_layer_5 = ConvolutionalLayer(self.pool_layer_4.output_tensor,
+                                               [3, 3, 64, 128],
                                                'conv_layer_5')
-
         self.pool_layer_6 = MaxPoolingLayer(self.conv_layer_5.output_tensor,
                                             'pool_layer_6')
-
-        self.conv_layer_7 = ConvolutionalLayer(self.pool_layer_6.output_tensor,
-                                               [3, 3, 64, 128],
-                                               'conv_layer_7')
-        self.conv_layer_8 = ConvolutionalLayer(self.conv_layer_7.output_tensor,
-                                               [3, 3, 128, 128],
-                                               'conv_layer_8')
-        self.conv_layer_9 = ConvolutionalLayer(self.conv_layer_8.output_tensor,
-                                               [3, 3, 128, 128],
-                                               'conv_layer_9')
-
-        self.pool_layer_10 = MaxPoolingLayer(self.conv_layer_9.output_tensor,
-                                            'pool_layer_10')
-
-        self.fc_input = tf.reshape(self.pool_layer_10.output_tensor,
+        self.fc_input = tf.reshape(self.pool_layer_6.output_tensor,
                                    [-1, 4*4*128])
-
-        self.fc_layer_11 = FullyConnectedLayer(self.fc_input,
-                                               [4*4*128, 100],
-                                               'fc_layer_11')
-        self.dropout_output_12 = tf.nn.dropout(self.fc_layer_11.output_tensor,
-                                               self.keep_prob)
-        self.fc_layer_13 = FullyConnectedLayer(self.dropout_output_12,
-                                               [100, 10],
-                                               'fc_layer_13')
+        #self.fc_layer_7 = FullyConnectedLayer(self.fc_input,
+        #                                      [4*4*128, 100],
+        #                                      'fc_layer_7')
+        #self.fc_layer_8 = FullyConnectedLayer(self.fc_layer_7.output_tensor,
+        #                                      [100, 10],
+        #                                      'fc_layer_8')
+        self.fc_layer_unique = FullyConnectedLayer(self.fc_input,
+                                                   [4*4*128, 10],
+                                                   'fc_layer_unique')
         self.conv_layers = [self.conv_layer_1,
-                            self.conv_layer_2,
-                            self.conv_layer_4,
-                            self.conv_layer_5,
-                            self.conv_layer_7,
-                            self.conv_layer_8,
-                            self.conv_layer_9]
+                            self.conv_layer_3,
+                            self.conv_layer_5]
+        
+        #self.fc_layers = [self.fc_layer_7,
+        #                  self.fc_layer_8]
 
-        self.fc_layers = [self.fc_layer_11,
-                          self.fc_layer_13]
-
+        self.fc_layers = [self.fc_layer_unique]
+        
         self.fc_params = []
         for layer in self.fc_layers:
             self.fc_params.append(layer.weights)
             self.fc_params.append(layer.biases)
-            
-        self.model_output = self.fc_layer_13.output_tensor
+
+        #### NO ACTIVATION FUNCTION @ LAST LAYER
+        self.model_output = self.fc_layer_unique.output_tensor_without_relu
+        #self.model_output = self.fc_layer_unique.output_tensor
         
         self.loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(
                 self.model_output,
                 self.target,
                 name='loss')
-            )
+            ) + 0.05*tf.nn.l2_loss(self.fc_layer_unique.weights)
         
 class ResidualNetwork(NeuralNetwork):
     def __init__(self):
@@ -186,15 +180,22 @@ if __name__=='__main__':
     #    convnet.train_iterations(100)
     #    print "Iteration %d"%((i+1)*100), convnet.evaluate()
 
-    for i in range(1):
+    for i in range(20):
         convnet.train_iterations(100)
-        print "Iteration %d"%((i+1)*100), convnet.evaluate()
+        val_acc = convnet.evaluate()
+        train_loss = convnet.evaluate_loss('training')
+        val_loss = convnet.evaluate_loss('validation')
+        print "Iteration %d. Val. acc: %.2f, Train loss: %.2f, Val. loss: %.2f"%(
+            (i+1)*100,
+            val_acc,
+            train_loss,
+            val_loss) 
     params = convnet.get_params()
     print len(params)
     print [[j.shape for j in p] for p in params]
     convnet.reset_params()
     convnet.set_params(params)
     print "accuracy after losing fully connected", convnet.evaluate()
-    for i in range(10):
+    for i in range(20):
         convnet.train_iterations(100, just_fc=True)
         print "acc after %d iters"%((i+1)*100), convnet.evaluate()

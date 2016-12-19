@@ -56,35 +56,65 @@ class Database(object):
     def getEpoch(self):
         return self.current_epoch
 
-    # TODO: refactor getTestSet and getValidationSet to avoid code replication
-    def getTestSet(self, asBatches=True):
+    def getSet(self, choose_set, asBatches=True):
+        if choose_set=='validation':
+            data = self.validation_data
+            labels = self.validation_labels
+        elif choose_set=='test':
+            data = self.test_data
+            labels = self.test_labels
+        elif choose_set=='training':
+            data = self.train_data
+            labels = self.train_labels
+        else:
+            raise Exception('choose_set must be "validation", "test" or "training"')
         if asBatches:
             batches = []
-            for i in range(len(self.test_labels)//self.batch_size):
+            for i in range(len(labels)//self.batch_size):
                 start_idx = i*self.batch_size
                 end_idx = start_idx + self.batch_size 
-                batch_data = self.test_data[start_idx:end_idx]
-                batch_labels = self.test_labels[start_idx:end_idx]
+                batch_data = data[start_idx:end_idx]
+                batch_labels = labels[start_idx:end_idx]
         
                 batches.append((batch_data, batch_labels))
             return batches
         else:
-            return (self.test_data, self.test_labels)
+            return (data, labels)
 
+    # TODO: refactor getTestSet and getValidationSet to avoid code replication
+    def getTestSet(self, asBatches=True):
+        #if asBatches:
+        #    batches = []
+        #    for i in range(len(self.test_labels)//self.batch_size):
+        #        start_idx = i*self.batch_size
+        #        end_idx = start_idx + self.batch_size 
+        #        batch_data = self.test_data[start_idx:end_idx]
+        #        batch_labels = self.test_labels[start_idx:end_idx]
+        #
+        #        batches.append((batch_data, batch_labels))
+        #    return batches
+        #else:
+        #    return (self.test_data, self.test_labels)
+        return self.getSet('test',asBatches=asBatches)
+        
     def getValidationSet(self, asBatches=True):
-        if asBatches:
-            batches = []
-            for i in range(len(self.validation_labels)//self.batch_size):
-                start_idx = i*self.batch_size
-                end_idx = start_idx + self.batch_size 
-                batch_data = self.validation_data[start_idx:end_idx]
-                batch_labels = self.validation_labels[start_idx:end_idx]
+        #if asBatches:
+        #    batches = []
+        #    for i in range(len(self.validation_labels)//self.batch_size):
+        #        start_idx = i*self.batch_size
+        #        end_idx = start_idx + self.batch_size 
+        #        batch_data = self.validation_data[start_idx:end_idx]
+        #        batch_labels = self.validation_labels[start_idx:end_idx]
+        #
+        #        batches.append((batch_data, batch_labels))
+        #    return batches
+        #else:
+        #    return (self.validation_data, self.validation_labels)
+        return self.getSet('validation', asBatches=asBatches)
 
-                batches.append((batch_data, batch_labels))
-            return batches
-        else:
-            return (self.validation_data, self.validation_labels)
-
+    def getTrainingSet(self, asBatches=True):
+        return self.getSet('training', asBatches=asBatches)
+    
     def reset(self):
         self.current_batch = 0
         self.current_epoch = 0
