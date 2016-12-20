@@ -82,6 +82,23 @@ class KernelChromosome(object):
         child1.setGenes(child1_genes)
         child2.setGenes(child2_genes)
         return child1, child2
+        
+    def random_pick_crossover(self, chromosome):
+		mask = np.random.randint(2, size=len(self.genes))
+		child1_genes = []
+		child2_genes = []
+		for i in range(len(self.genes)):
+			if mask[i]>0.5:
+				child1_genes.append(self.genes[i])
+				child2_genes.append(chromosome.genes[i])
+			else:
+				child2_genes.append(self.genes[i])
+				child1_genes.append(chromosome.genes[i])
+		child1 = KernelChromosome()
+		child2 = KernelChromosome()
+		child1.setGenes(child1_genes)
+		child2.setGenes(child2_genes)
+		return child1, child2
 
     def mutate(self, p):
         for i in range(len(self.genes)):
@@ -121,7 +138,8 @@ class Genome(object):
         child1 = Genome()
         child2 = Genome()
         for i in range (self.n_chromosomes):
-            chromo1, chromo2 = self.chromosomes[i].geneCrossover(genome.chromosomes[i])
+            #chromo1, chromo2 = self.chromosomes[i].geneCrossover(genome.chromosomes[i])
+            chromo1, chromo2 = self.chromosomes[i].random_pick_crossover(genome.chromosomes[i])
             child1.add_chromosome(chromo1)
             child2.add_chromosome(chromo2)
         return child1, child2

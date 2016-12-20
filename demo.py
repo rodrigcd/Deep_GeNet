@@ -38,9 +38,19 @@ from .population import Individual, Population
 #print ind3.fitness
 #print "done"
 
+
+# TEST FOR INDIVIDUAL RECOVERY -> IS WORKING :D
+#print "\n"*10,"Recovering individual test"
+#indiv = Individual()
+#indiv.grow_all_params(1000, first_iter=True)
+#print "Fitness after 1000 iters %.2f"%(indiv.fitness)
+#indiv.repair_and_grow(1000, repair_iters=400)
+#print "\n"*10
+
+
 fitness = list()
 n_gen = 100
-population = Population()
+population = Population(n_indiv=6)
 for i in range(n_gen):
     fitness.append(population.iter())
 

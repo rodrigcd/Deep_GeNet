@@ -23,6 +23,7 @@ class NeuralNetwork(object):
         raise NotImplementedError("Must override NeuralNetwork.build_model()")
 
     def reset_params(self):
+        print "[NN.reset_params]"
         self.sess.run(tf.initialize_all_variables())
         
     def train_iterations(self, n_iterations, just_fc=False):
@@ -78,12 +79,14 @@ class NeuralNetwork(object):
         return np.array(accuracies).mean()
 
     def get_params(self):
+        print "[NN.get_params]"
         params = []
         for layer in self.conv_layers:
             params.append(layer.get_params(self.sess))
         return params
 
     def set_params(self, params):
+        print "[NN.set_params]"
         for param, layer in zip(params, self.conv_layers):
             layer.set_params(param, self.sess)
             
@@ -180,7 +183,7 @@ if __name__=='__main__':
     #    convnet.train_iterations(100)
     #    print "Iteration %d"%((i+1)*100), convnet.evaluate()
 
-    for i in range(20):
+    for i in range(10):
         convnet.train_iterations(100)
         val_acc = convnet.evaluate()
         train_loss = convnet.evaluate_loss('training')
@@ -196,6 +199,6 @@ if __name__=='__main__':
     convnet.reset_params()
     convnet.set_params(params)
     print "accuracy after losing fully connected", convnet.evaluate()
-    for i in range(20):
+    for i in range(4):
         convnet.train_iterations(100, just_fc=True)
         print "acc after %d iters"%((i+1)*100), convnet.evaluate()
