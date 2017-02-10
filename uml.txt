@@ -1,0 +1,89 @@
+def unpickle(filename):
+def batch_to_bc01(batch):
+def batch_to_b01c(batch):
+def labels_to_one_hot(labels):
+class Database(object):
+    def __init__(self):
+    def nextBatch(self, with_idx=False):
+    def getEpoch(self):
+    def getSet(self, choose_set, asBatches=True):
+    def getTestSet(self, asBatches=True):
+    def getValidationSet(self, asBatches=True):
+    def getTrainingSet(self, asBatches=True):
+    def reset(self):
+class CIFAR10(Database):
+    def __init__(self, batch_size=100, validation_proportion=0.1,
+class KernelGene(object):
+    def __init__(self, kernel, bias):
+    def __str__(self):
+    def mutate(self,p):
+class PoolingChromosome(object):
+    def __init__(self, pooling_size, stride):
+    def __str__(self):
+    def mutate(self,p):
+class KernelChromosome(object):
+    def __init__(self, kernels = [], biases = []):
+    def __str__(self):
+    def setGenes(self, genes):
+    def geneCrossover(self, chromosome):
+    def random_pick_crossover(self, chromosome):
+    def mutate(self, p):
+class Genome(object):
+    def __init__(self, parameters = []):
+    def __str__(self):
+    def mutate(self, p):
+    def crossover(self, genome):
+    def set_parameters(self, parameters):
+    def get_parameters(self):
+    def add_chromosome(self, chromosome):
+class Layer(object):
+    def __init__(self, input_tensor, layer_name):
+        # A self.output_tensor should be implemented on inherited classes
+    def get_params(self, session):
+    def set_params(self, params, session):
+class ConvolutionalLayer(Layer):
+    def __init__(self, input_tensor, kernel_shape, layer_name):
+    def get_params(self, session):
+    def set_params(self, params, session):
+class FullyConnectedLayer(Layer):
+    def __init__(self, input_tensor, weights_shape, layer_name):
+    def get_params(self, session):
+    def set_params(self, params, session):
+class MaxPoolingLayer(Layer):
+    def __init__(self, input_tensor, layer_name,
+    def get_params(self, session):
+    def set_params(self, params, session):
+class NeuralNetwork(object):
+    def __init__(self, database):
+    def build_model(self):
+    def reset_params(self):
+    def train_iterations(self, n_iterations, just_fc=False):
+    def evaluate_loss(self, choose_set):
+    def evaluate(self, use_test=False):
+    def get_params(self):
+    def set_params(self, params):
+class ConvolutionalNetwork(NeuralNetwork):
+    def __init__(self, database):
+    def build_model(self):
+class ResidualNetwork(NeuralNetwork):
+    def __init__(self):
+class Individual(object):
+    def __init__(self):
+    def update_genome(self):
+    def update_phenotype(self):
+    def grow_all_params(self, n_iter, first_iter=False):#, just_fc = False):
+    def repair(self, repair_iters=400):
+    def repair_and_grow(self, grow_iters, repair_iters=400):
+    def crossover(self, individual, repair_iters=400):
+    def mutate(self, p):
+    def evaluate(self):
+class Population(object):
+    def __init__(self, n_indiv = 10, selection_method = 'proportional'):
+    def crossover(self):
+    def mutate(self, p = 0.05):
+    def update_fitness(self):
+    #def grow_population(self):
+    def repair_and_grow(self):
+    def select_individuals(self):
+    def print_statistics(self):
+    def iter(self):

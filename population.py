@@ -6,6 +6,15 @@ from .layers import ConvolutionalLayer, MaxPoolingLayer, FullyConnectedLayer
 from .model import NeuralNetwork, ConvolutionalNetwork
 from .genetic import Genome, KernelChromosome, KernelGene
 
+def proportional_random_selection(fitness_list):
+    accumulated_fitness = np.cumsum(fitness_list)
+    accumulated_probs = 1.0*accumulated_fitness/accumulated_fitness[-1]
+    random_num = np.random.uniform()
+    for individual_idx, cum_prob in enumerate(accumulated_probs):
+        if random_num < cum_prob:
+            return individual_idx
+    raise Exception('Bug on proportional_random_selection function.')
+
 class Individual(object):
     'Basic indiviual with a genome and a phenotype'
     database = CIFAR10(batch_size = 100, augment_data=True)
@@ -29,7 +38,7 @@ class Individual(object):
         #self.convnet.train_iterations(300, just_fc=True)
         #print "[grow] after fc tuning %f"%(self.convnet.evaluate())
         if first_iter:
-			self.convnet.reset_params()
+            self.convnet.reset_params()
         self.convnet.train_iterations(n_iter, just_fc=False)
         self.fitness = self.convnet.evaluate()
         print "[grow_all_params] Val. acc: %.2f"%(self.fitness)
@@ -84,26 +93,23 @@ class Population(object):
         self.fix_n_indiv = n_indiv
         for i in range(n_indiv):
             individual = Individual()
-            individual.grow_all_params(600, first_iter=True)
+            individual.grow_all_params(100, first_iter=True)
             self.individuals.append(individual)
         print self.individuals
         self.update_fitness()
 
     def crossover(self):
-        acumulated_prob = np.cumsum(self.fitness)
-        acumulated_prob = acumulated_prob/np.max(acumulated_prob)
-        aux = self.n_indiv
         for i in range(int(self.n_indiv/2)):
-            random1 = np.random.uniform()
-            random2 = np.random.uniform()
-            index1 = np.min(np.nonzero(np.floor_divide(acumulated_prob,random1)))
-            index2 = np.min(np.nonzero(np.floor_divide(acumulated_prob,random2)))
-            print "[Population.crossover] Crossing %d and %d"%(index1, index2)
-            child1, child2 = self.individuals[index1].crossover(self.individuals[index2], self.n_iter)
+            parent1_idx = proportional_random_selection(self.fitness)
+            parent2_idx = parent1_idx
+            while parent1_idx == parent2_idx:
+                parent2_idx = proportional_random_selection(self.fitness)
+            print "[Population.crossover] Crossing %d and %d"%(parent1_idx, parent2_idx)
+            child1, child2 = self.individuals[parent1_idx].crossover(
+                self.individuals[parent2_idx], self.n_iter)
             self.individuals.append(child1)
             self.individuals.append(child2)
-            aux += 2
-        self.n_indiv = aux
+            self.n_indiv += 2
         self.update_fitness()
 
     def mutate(self, p = 0.05):
@@ -132,12 +138,15 @@ class Population(object):
     def select_individuals(self):
         index = np.argsort(self.fitness)
         index = index[-self.fix_n_indiv:]
+        is_son = index>=(self.n_indiv//2)
+        son_prop =is_son.astype('float32').mean()
         aux_list = list()
         for i in index:
             aux_list.append(self.individuals[i])
         self.individuals = aux_list
         self.n_indiv = len(self.individuals)
         self.update_fitness()
+        return son_prop
         
     def print_statistics(self):
         print "Population fitness:\nMean: %.2f, Max: %.2f"%(np.mean(self.fitness), np.max(self.fitness))
@@ -151,7 +160,8 @@ class Population(object):
         self.print_statistics()
         
         print "Selection..."
-        self.select_individuals()
+        son_prop = self.select_individuals()
+        print "Sons proportion %.2f"%(son_prop)
         self.print_statistics()
         
         print "Repair and grow..."
@@ -174,19 +184,4 @@ class Population(object):
         ##self.update_fitness
         #print("after selection and mutation")
         #print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
-        return self.fitness
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return self.fitness, son_prop
