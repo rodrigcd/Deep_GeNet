@@ -81,35 +81,10 @@ class Database(object):
         else:
             return (data, labels)
 
-    # TODO: refactor getTestSet and getValidationSet to avoid code replication
     def getTestSet(self, asBatches=True):
-        #if asBatches:
-        #    batches = []
-        #    for i in range(len(self.test_labels)//self.batch_size):
-        #        start_idx = i*self.batch_size
-        #        end_idx = start_idx + self.batch_size 
-        #        batch_data = self.test_data[start_idx:end_idx]
-        #        batch_labels = self.test_labels[start_idx:end_idx]
-        #
-        #        batches.append((batch_data, batch_labels))
-        #    return batches
-        #else:
-        #    return (self.test_data, self.test_labels)
         return self.getSet('test',asBatches=asBatches)
         
     def getValidationSet(self, asBatches=True):
-        #if asBatches:
-        #    batches = []
-        #    for i in range(len(self.validation_labels)//self.batch_size):
-        #        start_idx = i*self.batch_size
-        #        end_idx = start_idx + self.batch_size 
-        #        batch_data = self.validation_data[start_idx:end_idx]
-        #        batch_labels = self.validation_labels[start_idx:end_idx]
-        #
-        #        batches.append((batch_data, batch_labels))
-        #    return batches
-        #else:
-        #    return (self.validation_data, self.validation_labels)
         return self.getSet('validation', asBatches=asBatches)
 
     def getTrainingSet(self, asBatches=True):

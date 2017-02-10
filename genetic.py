@@ -7,8 +7,6 @@ class KernelGene(object):
 
         if (type(kernel).__module__ != np.__name__):
             raise ValueError('Kernel Gene must be a numpy array')
-        #elif (type(stride).__name__ != 'int' or stride <= 0):
-        #    raise ValueError('Stride must be an integer bigger than 0')
         self.kernel = kernel
         self.bias = bias
 
@@ -110,7 +108,6 @@ class Genome(object):
     #TODO: Implement constructor to given parameters ? and chromCrossover
     def __init__(self, parameters = []):
         if len(parameters) == 0:
-            #self.chromosome_type = ['convolution', 'pooling']
             self.n_chromosomes = 0
             self.chromosomes = list()
         else:

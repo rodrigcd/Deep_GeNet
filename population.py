@@ -31,12 +31,7 @@ class Individual(object):
     def update_phenotype(self):
         self.convnet.set_params(self.genome.get_parameters())
 
-    def grow_all_params(self, n_iter, first_iter=False):#, just_fc = False):
-        #self.convnet.reset_params()
-        #self.update_phenotype()
-        #print "[grow] before 300 iters of fc tuning %f"%(self.convnet.evaluate())
-        #self.convnet.train_iterations(300, just_fc=True)
-        #print "[grow] after fc tuning %f"%(self.convnet.evaluate())
+    def grow_all_params(self, n_iter, first_iter=False):
         if first_iter:
             self.convnet.reset_params()
         self.convnet.train_iterations(n_iter, just_fc=False)
@@ -64,10 +59,6 @@ class Individual(object):
         genome1, genome2 = self.genome.crossover(individual.genome)
         child1.genome = genome1
         child2.genome = genome2
-        #child1.grow(int(n_iter/2), just_fc = True)
-        #child2.grow(int(n_iter/2), just_fc = True)
-        #child1.grow(int(n_iter/2))
-        #child2.grow(int(n_iter/2))
         child1.repair(repair_iters=repair_iters)
         child2.repair(repair_iters=repair_iters)
         return child1, child2
@@ -117,18 +108,8 @@ class Population(object):
             self.individuals[i].mutate(p)
 
     def update_fitness(self):
-        #aux_fitness = np.zeros(self.n_indiv)
-        #for i in range(self.n_indiv):
-        #    aux_fitness[i] = self.individuals[i].evaluate()
-        #self.fitness = aux_fitness
-
         # ASSUMES THAT EACH INDIVIDUAL KEEPS AN UPDATED VERSION OF ITS FITNESS
         self.fitness = [individual.fitness for individual in self.individuals]
-
-    #def grow_population(self):
-    #    for i in range(self.n_indiv):
-    #        self.individuals[i].grow(self.n_iter)
-    #    self.update_fitness()
 
     def repair_and_grow(self):
         for individual in self.individuals:
@@ -168,20 +149,4 @@ class Population(object):
         self.repair_and_grow()
         
         self.generation += 1
-        #print("\t growing")
-        #self.grow_population()
-        #print("\t Fitness after growing")
-        #print(self.fitness)
-        #print("\t best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
-        #print("\n crossover")
-        #self.crossover()
-        ##self.update_fitness()
-        #print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
-        #self.select_individuals()
-        #print(self.fitness)
-        ##self.mutate()
-        #self.generation += 1
-        ##self.update_fitness
-        #print("after selection and mutation")
-        #print("best_fitness = "+str(np.max(self.fitness))+" mean_fitness = "+str(np.mean(self.fitness)))
         return self.fitness, son_prop

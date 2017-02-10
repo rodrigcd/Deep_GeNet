@@ -117,21 +117,12 @@ class ConvolutionalNetwork(NeuralNetwork):
                                             'pool_layer_6')
         self.fc_input = tf.reshape(self.pool_layer_6.output_tensor,
                                    [-1, 4*4*128])
-        #self.fc_layer_7 = FullyConnectedLayer(self.fc_input,
-        #                                      [4*4*128, 100],
-        #                                      'fc_layer_7')
-        #self.fc_layer_8 = FullyConnectedLayer(self.fc_layer_7.output_tensor,
-        #                                      [100, 10],
-        #                                      'fc_layer_8')
         self.fc_layer_unique = FullyConnectedLayer(self.fc_input,
                                                    [4*4*128, 10],
                                                    'fc_layer_unique')
         self.conv_layers = [self.conv_layer_1,
                             self.conv_layer_3,
                             self.conv_layer_5]
-        
-        #self.fc_layers = [self.fc_layer_7,
-        #                  self.fc_layer_8]
 
         self.fc_layers = [self.fc_layer_unique]
         
@@ -161,27 +152,6 @@ if __name__=='__main__':
     data, labels = database.getTestSet(asBatches=False)
     print len(data), len(labels)
     convnet = ConvolutionalNetwork(database)
-    #print "Initial performance", convnet.evaluate()
-    #convnet.train_iterations(100)
-    #print "Performance after 100 iterations", convnet.evaluate()
-    #convnet.train_iterations(100, just_fc=True)
-    #print "Performance after 100 fc iterations", convnet.evaluate()
-    #params = convnet.get_params()
-    #print [[param.shape for param in params_pair] for params_pair in convnet.get_params()]
-    #zero_params = [[np.zeros(param.shape) for param in params_pair] for params_pair in convnet.get_params()]
-    #convnet.set_params(zero_params)
-    #print "Performance with zeros as params", convnet.evaluate()
-    #convnet.train_iterations(100)
-    #print "Performance after 100 iterations", convnet.evaluate()
-    #convnet.reset_params()
-    #print "Reseting params..."
-    #convnet.train_iterations(100)
-    #print "Performance after 100 iterations", convnet.evaluate()
-
-
-    #for i in range(10000):
-    #    convnet.train_iterations(100)
-    #    print "Iteration %d"%((i+1)*100), convnet.evaluate()
 
     for i in range(10):
         convnet.train_iterations(100)
