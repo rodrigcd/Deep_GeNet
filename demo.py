@@ -8,7 +8,9 @@ from .model import NeuralNetwork, ConvolutionalNetwork
 from .genetic import Genome, KernelChromosome, KernelGene
 from .population import Individual, Population
 
-'''[[(3, 3, 3, 32), (32,)], [(3, 3, 32, 32), (32,)], [(3, 3, 32, 64), (64,)], [(3, 3, 64, 64), (64,)], [(3, 3, 64, 128), (128,)], [(3, 3, 128, 128), (128,)], [(3, 3, 128, 128), (128,)]]
+'''[[(3, 3, 3, 32), (32,)], [(3, 3, 32, 32), (32,)], [(3, 3, 32, 64), (64,)],\
+ [(3, 3, 64, 64), (64,)], [(3, 3, 64, 128), (128,)], [(3, 3, 128, 128), (128,)],\
+ [(3, 3, 128, 128), (128,)]]
 '''
 fitness = []
 son_props = []

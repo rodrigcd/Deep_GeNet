@@ -120,11 +120,9 @@ class Population(object):
         index = np.argsort(self.fitness)
         index = index[-self.fix_n_indiv:]
         is_son = index>=(self.n_indiv//2)
-        son_prop =is_son.astype('float32').mean()
+        son_prop = is_son.astype('float32').mean()
         aux_list = list()
-        for i in index:
-            aux_list.append(self.individuals[i])
-        self.individuals = aux_list
+        self.individuals = [self.individuals[i] for i in index]
         self.n_indiv = len(self.individuals)
         self.update_fitness()
         return son_prop
